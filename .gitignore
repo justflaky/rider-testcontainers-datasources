@@ -1,0 +1,18 @@
+# Gradle / build
+.gradle/
+build/
+
+# IntelliJ Platform Gradle Plugin: sandbox + downloaded IDE distributions (~GBs)
+.intellijPlatform/
+
+# IDE
+.idea/
+*.iml
+
+# .NET demo project
+tc-demo/bin/
+tc-demo/obj/
+
+# misc
+*.log
+run/

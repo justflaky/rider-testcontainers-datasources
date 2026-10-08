@@ -1,0 +1,22 @@
+<idea-plugin>
+    <id>Testcontainers.DataSources</id>
+    <name>Testcontainers Data Sources</name>
+    <vendor>justflaky</vendor>
+    <description><![CDATA[
+    Automatically registers Database tool window data sources for databases started by Testcontainers.
+    <p>
+    When a Testcontainers-managed container (PostgreSQL, MySQL, MariaDB, SQL Server) starts,
+    the plugin reads its published port and credentials from Docker and creates a ready-to-use
+    data source. When the container is removed (Ryuk cleanup), the data source is removed too.
+    </p>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.database</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="tcds.TcSettings"/>
+        <postStartupActivity implementation="tcds.TcStartupActivity"/>
+        <notificationGroup id="TC DataSources" displayType="BALLOON"/>
+    </extensions>
+</idea-plugin>
