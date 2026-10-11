@@ -1,9 +1,9 @@
 <plugins>
   <plugin id="Testcontainers.DataSources"
-          url="https://github.com/justflaky/rider-testcontainers-datasources/releases/download/v0.4.1/rider-testcontainers-datasources-0.4.1.zip"
-          version="0.4.1">
+          url="https://github.com/justflaky/rider-testcontainers-datasources/releases/download/v0.4.2/rider-testcontainers-datasources-0.4.2.zip"
+          version="0.4.2">
     <idea-version since-build="262"/>
     <name>Testcontainers Data Sources</name>
     <description>Automatically creates Database tool window data sources for containers started by Testcontainers (PostgreSQL, MySQL, MariaDB, SQL Server, Redis, MongoDB) and removes them when the container dies. Requires docker CLI in PATH.</description>
-    <change-notes>Fix: the plugin no longer hangs Rider on "Unloading plugins" during plugin or IDE updates (watcher coroutines now stop deterministically in dispose).</change-notes>  </plugin>
+    <change-notes>Copy Connection As submenu polish: per-data-source separators, shorter labels, type icons, and a hover description showing the exact string.</change-notes> </plugin>
 </plugins>
