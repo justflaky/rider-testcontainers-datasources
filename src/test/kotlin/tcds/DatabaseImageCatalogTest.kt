@@ -26,7 +26,6 @@ class DatabaseImageCatalogTest {
         assertEquals("app", t.user)
         assertEquals("s3cret", t.password)
         assertEquals("orders", t.database)
-        assertEquals("org.postgresql.Driver", t.driverClass)
     }
 
     @Test
@@ -138,7 +137,6 @@ class DatabaseImageCatalogTest {
         assertEquals("jdbc:redis://localhost:55005", t.url)
         assertEquals("", t.user)
         assertEquals("", t.password)
-        assertEquals("com.redis.jdbc.Driver", t.driverClass)
     }
 
     @Test

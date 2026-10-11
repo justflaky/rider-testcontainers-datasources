@@ -1,10 +1,10 @@
 <plugins>
   <plugin id="Testcontainers.DataSources"
-          url="https://github.com/justflaky/rider-testcontainers-datasources/releases/download/v0.1.0/rider-testcontainers-datasources-0.1.0.zip"
-          version="0.1.0">
+          url="https://github.com/justflaky/rider-testcontainers-datasources/releases/download/v0.1.1/rider-testcontainers-datasources-0.1.1.zip"
+          version="0.1.1">
     <idea-version since-build="262"/>
     <name>Testcontainers Data Sources</name>
     <description>Automatically creates Database tool window data sources for containers started by Testcontainers (PostgreSQL, MySQL, MariaDB, SQL Server, Redis) and removes them when the container dies. Requires docker CLI in PATH.</description>
-    <change-notes>Initial release: PostgreSQL (+postgis/timescaledb/pgvector), MySQL, MariaDB, SQL Server, Redis (+redis-stack/valkey). Verified against Rider 2026.2.</change-notes>
+    <change-notes>Fix: data sources now reference the predefined driver definitions (PostgreSQL/MySQL/MariaDB/SQL Server/Redis), so driver files are auto-downloaded and the connection works out of the box instead of "Driver class not found / No driver files provided".</change-notes>
   </plugin>
 </plugins>

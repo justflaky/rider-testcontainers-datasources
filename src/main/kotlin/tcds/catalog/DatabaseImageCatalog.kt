@@ -11,14 +11,13 @@ data class JdbcTarget(
     val user: String,
     val password: String,
     val database: String?,
-    val driverClass: String,
 )
 
 /**
  * Maps a running Testcontainers container to a JDBC connection target.
  * Credentials are embedded as URL properties: LocalDataSource.create() has no password
- * parameter (create(name, driverClass, url, user) in RD-262) and every supported driver
- * accepts user/password from the URL.
+ * parameter and every supported driver accepts user/password from the URL. The driver
+ * definition is attached by DataSourceRegistrar via DatabaseDriver.matchesUrl().
  */
 object DatabaseImageCatalog {
 
@@ -52,7 +51,6 @@ object DatabaseImageCatalog {
                 TcDbms.POSTGRES,
                 "jdbc:postgresql://localhost:$host/${enc(db)}?${creds(user, password)}",
                 user, password, db,
-                "org.postgresql.Driver",
             )
         },
         Spec(
@@ -67,7 +65,6 @@ object DatabaseImageCatalog {
                 TcDbms.MYSQL,
                 "jdbc:mysql://localhost:$host/${db ?: ""}?${creds(user, password ?: "")}&useSSL=false&allowPublicKeyRetrieval=true",
                 user, password ?: "", db,
-                "com.mysql.cj.jdbc.Driver",
             )
         },
         Spec(
@@ -86,7 +83,6 @@ object DatabaseImageCatalog {
                 TcDbms.MARIA,
                 "jdbc:mariadb://localhost:$host/${db ?: ""}?${creds(user, password ?: "")}",
                 user, password ?: "", db,
-                "org.mariadb.jdbc.Driver",
             )
         },
         Spec(
@@ -100,7 +96,6 @@ object DatabaseImageCatalog {
                 TcDbms.MSSQL,
                 "jdbc:sqlserver://localhost:$host;databaseName=$db;user=sa;password=${enc(password)};encrypt=false;trustServerCertificate=true",
                 "sa", password, db,
-                "com.microsoft.sqlserver.jdbc.SQLServerDriver",
             )
         },
         Spec(
@@ -115,7 +110,6 @@ object DatabaseImageCatalog {
                 TcDbms.REDIS,
                 url,
                 "", password, null,
-                "com.redis.jdbc.Driver",
             )
         },
     )

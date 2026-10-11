@@ -1,5 +1,6 @@
 package tcds.ds
 
+import com.intellij.database.dataSource.DatabaseDriverManager
 import com.intellij.database.dataSource.LocalDataSource
 import com.intellij.database.dataSource.LocalDataSourceManager
 import com.intellij.database.util.LoaderContext
@@ -30,12 +31,30 @@ class DataSourceRegistrar(private val project: Project) {
                 tracked(info.id)?.let(manager::removeDataSource)
 
                 val name = dsName(info)
-                // bytecode-verified order in RD-262: create(name, driverClass, url, user);
-                // password travels inside the JDBC URL (see DatabaseImageCatalog)
-                val ds = LocalDataSource.create(name, target.driverClass, target.url, target.user)
+                // Attach the predefined driver definition (carries JDBC files + auto-download):
+                // LocalDataSource.create() only sets a driver *class*, which yields
+                // "No driver files provided". matchesUrl + createDataSource is the same
+                // path the IDE's "New Data Source" menu uses.
+                val driver = runCatching {
+                    DatabaseDriverManager.getInstance().drivers
+                        .filterIsInstance<com.intellij.database.dataSource.DatabaseDriver>()
+                        .firstOrNull { runCatching { it.matchesUrl(target.url) }.getOrDefault(false) }
+                }.getOrNull()
+
+                val ds: LocalDataSource = if (driver != null) {
+                    driver.createDataSource(name).also {
+                        it.url = target.url
+                        it.username = target.user
+                    }
+                } else {
+                    LOG.warn("tcds: no predefined driver matches ${target.url}, falling back to bare data source")
+                    LocalDataSource.create(name, "", target.url, target.user)
+                }
+                LOG.info(
+                    "tcds: driver for ${info.shortId}: name=${driver?.name} id=${driver?.id} " +
+                        "dbms=${ds.dbms} driverRef=${ds.driverRef}",
+                )
                 ds.setAutoSynchronize(true)
-                runCatching { ds.ensureDriverConfigured() }
-                    .onFailure { LOG.warn("tcds: ensureDriverConfigured failed: ${it.message}") }
                 manager.addDataSource(ds)
                 LOG.info("tcds: registered data source name='${ds.name}' url='${ds.url}' user='${ds.username}' container=${info.id}")
 
