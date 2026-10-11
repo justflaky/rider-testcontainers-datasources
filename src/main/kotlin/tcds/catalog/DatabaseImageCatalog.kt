@@ -11,6 +11,8 @@ data class JdbcTarget(
     val user: String,
     val password: String,
     val database: String?,
+    val port: Int = 0,
+    val host: String = "localhost",
 )
 
 /**
@@ -54,6 +56,7 @@ object DatabaseImageCatalog {
                 TcDbms.POSTGRES,
                 "jdbc:postgresql://localhost:$host/${enc(db)}?${creds(user, password)}",
                 user, password, db,
+                port = host,
             )
         },
         Spec(
@@ -68,6 +71,7 @@ object DatabaseImageCatalog {
                 TcDbms.MYSQL,
                 "jdbc:mysql://localhost:$host/${db ?: ""}?${creds(user, password ?: "")}&useSSL=false&allowPublicKeyRetrieval=true",
                 user, password ?: "", db,
+                port = host,
             )
         },
         Spec(
@@ -86,6 +90,7 @@ object DatabaseImageCatalog {
                 TcDbms.MARIA,
                 "jdbc:mariadb://localhost:$host/${db ?: ""}?${creds(user, password ?: "")}",
                 user, password ?: "", db,
+                port = host,
             )
         },
         Spec(
@@ -99,6 +104,7 @@ object DatabaseImageCatalog {
                 TcDbms.MSSQL,
                 "jdbc:sqlserver://localhost:$host;databaseName=$db;user=sa;password=${enc(password)};encrypt=false;trustServerCertificate=true",
                 "sa", password, db,
+                port = host,
             )
         },
         Spec(
@@ -113,6 +119,7 @@ object DatabaseImageCatalog {
                 TcDbms.REDIS,
                 url,
                 "", password, null,
+                port = host,
             )
         },
         Spec(
@@ -127,7 +134,7 @@ object DatabaseImageCatalog {
             } else {
                 "mongodb://localhost:$host/"
             }
-            JdbcTarget(TcDbms.MONGO, url, user ?: "", password, null)
+            JdbcTarget(TcDbms.MONGO, url, user ?: "", password, null, port = host)
         },
     )
 

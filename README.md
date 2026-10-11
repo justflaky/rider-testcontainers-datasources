@@ -10,6 +10,11 @@ Testcontainers. Gdy test startuje kontener Postgresa, plugin w ułamku sekundy:
 3. tworzy data source `TC <obraz> <shortId>` z gotowym URL JDBC i credentialami,
 4. po zakończeniu testu (kontener usuwa Ryuk) **usuwa data source automatycznie**.
 
+Dodatkowo: menu kontekstowe data source'a w Database view ma podmenu **„Copy Connection As…"** —
+connection string w formatach, które się wkleja: JDBC URL, **ADO.NET/EF Core** (Npgsql,
+MySqlConnector/Pomelo, Microsoft.Data.SqlClient), **CLI** (`psql`, `mysql`, `sqlcmd`,
+`redis-cli`, `mongosh`, `pymongo`), StackExchange.Redis.
+
 Obsługiwane obrazy: **PostgreSQL** (i pochodne: postgis, timescaledb, pgvector), **MySQL**,
 **MariaDB**, **SQL Server** (`mcr.microsoft.com/mssql/server`, azure-sql-edge) oraz **Redis**
 (oficjalny `redis`, `redis-stack`/`redis-stack-server`, `valkey`; hasło czytane z

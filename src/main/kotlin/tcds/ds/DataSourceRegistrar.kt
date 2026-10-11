@@ -47,6 +47,7 @@ class DataSourceRegistrar(
                     is RegistrationDecision.UpdateInPlace -> {
                         existing!!.url = decision.url
                         existing.username = decision.user
+                        storeConnProps(existing, target)
                         manager.saveDataSource(existing)
                         LOG.info("tcds: updated data source '${existing.name}' url='${redactUrl(existing.url.orEmpty())}'")
                         scheduleSync(existing)
@@ -86,6 +87,7 @@ class DataSourceRegistrar(
                 "dbms=${ds.dbms} driverRef=${ds.driverRef}",
         )
         ds.setAdditionalProperty(DsOwnership.MARKER_KEY, info.id)
+        storeConnProps(ds, target)
         ds.setAutoSynchronize(true)
         manager.addDataSource(ds)
         LOG.info("tcds: registered data source name='${ds.name}' url='${redactUrl(ds.url.orEmpty())}' user='${ds.username}' container=${info.id}")
@@ -152,6 +154,16 @@ class DataSourceRegistrar(
 
     private fun dsName(info: ContainerInfo): String =
         "${TcSettings.getInstance().namePrefix} ${info.imageBase} ${info.shortId}"
+
+    /** Structured connection data for the "Copy Connection As..." action (persists with the DS). */
+    private fun storeConnProps(ds: LocalDataSource, target: tcds.catalog.JdbcTarget) {
+        ds.setAdditionalProperty(DsOwnership.KEY_DBMS, target.dbms.name)
+        ds.setAdditionalProperty(DsOwnership.KEY_HOST, target.host)
+        ds.setAdditionalProperty(DsOwnership.KEY_PORT, target.port.toString())
+        target.database?.let { ds.setAdditionalProperty(DsOwnership.KEY_DB, it) }
+        ds.setAdditionalProperty(DsOwnership.KEY_USER, target.user)
+        ds.setAdditionalProperty(DsOwnership.KEY_PASS, target.password)
+    }
 
     /**
      * The database usually needs a few seconds after container start before it accepts

@@ -21,4 +21,14 @@
         <postStartupActivity implementation="tcds.TcStartupActivity"/>
         <notificationGroup id="TC DataSources" displayType="BALLOON"/>
     </extensions>
+
+    <actions>
+        <action id="Tcds.CopyConnectionAs"
+                class="tcds.action.CopyConnectionAsGroup"
+                text="Copy Connection As…"
+                description="Copy the Testcontainers data source connection string as JDBC, ADO.NET/EF Core, or a CLI command"
+                popup="true">
+            <add-to-group group-id="DatabaseViewPopupMenu" anchor="first"/>
+        </action>
+    </actions>
 </idea-plugin>

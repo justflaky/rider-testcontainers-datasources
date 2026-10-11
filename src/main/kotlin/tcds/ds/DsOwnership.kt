@@ -14,6 +14,14 @@ object DsOwnership {
 
     const val MARKER_KEY: String = "tcds.containerId"
 
+    // structured connection data (persisted; read by the Copy Connection As... action)
+    const val KEY_DBMS: String = "tcds.dbms"
+    const val KEY_HOST: String = "tcds.host"
+    const val KEY_PORT: String = "tcds.port"
+    const val KEY_DB: String = "tcds.db"
+    const val KEY_USER: String = "tcds.user"
+    const val KEY_PASS: String = "tcds.pass"
+
     private val nameShape = Regex("^([a-z0-9._-]+) ([0-9a-f]{7})$")
 
     /**
