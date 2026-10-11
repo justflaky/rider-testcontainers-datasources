@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "tcds"
-version = "0.1.1"
+version = "0.2.0"
 
 repositories {
     mavenCentral()
@@ -39,6 +39,11 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         version = project.version.toString()
+        ideaVersion {
+            sinceBuild = provider { "262" }
+            // semi-internal com.intellij.database API: opt out of future lines until verified
+            untilBuild = provider { "262.*" }
+        }
     }
     instrumentCode = false
     buildSearchableOptions = false
