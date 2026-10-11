@@ -8,18 +8,21 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.actionSystem.Separator
 import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.ide.CopyPasteManager
 import tcds.catalog.TcDbms
 import tcds.connstr.ConnData
+import tcds.connstr.CopyFormat
+import tcds.connstr.FormatKind
 import tcds.connstr.connectionFormats
 import tcds.ds.DsOwnership
 import java.awt.datatransfer.StringSelection
 
 /**
  * "Copy Connection As..." submenu in the Database view context menu.
- * Lists every plugin-owned data source with its connection string in the formats
- * people actually paste: JDBC, ADO.NET / EF Core provider strings, CLI invocations.
+ * Lists plugin-owned data sources, grouped with named separators when several are live;
+ * entries carry type icons (JDBC/.NET vs CLI) for faster scanning.
  */
 class CopyConnectionAsGroup : DefaultActionGroup() {
 
@@ -31,13 +34,13 @@ class CopyConnectionAsGroup : DefaultActionGroup() {
 
     override fun getChildren(e: AnActionEvent?): Array<AnAction> {
         val owned = e?.let(::ownedDataSources) ?: return emptyArray()
-        val many = owned.size > 1
-        return owned.flatMap { ds ->
-            val data = connData(ds) ?: return@flatMap emptyList<AnAction>()
-            connectionFormats(data).map { f ->
-                CopyTextAction(if (many) "[${ds.name}] ${f.label}" else f.label, f.text)
-            }
-        }.toTypedArray()
+        val children = mutableListOf<AnAction>()
+        for (ds in owned) {
+            val data = connData(ds) ?: continue
+            if (owned.size > 1) children += Separator.create(ds.name)
+            children += connectionFormats(data).map { CopyTextAction(it) }
+        }
+        return children.toTypedArray()
     }
 
     private fun ownedDataSources(e: AnActionEvent): List<LocalDataSource> {
@@ -62,16 +65,25 @@ class CopyConnectionAsGroup : DefaultActionGroup() {
         )
     }
 
-    private class CopyTextAction(private val label: String, private val text: String) : AnAction(label) {
+    private class CopyTextAction(private val format: CopyFormat) :
+        AnAction(format.label, format.text, iconFor(format.kind)) {
+
         override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
         override fun actionPerformed(e: AnActionEvent) {
-            CopyPasteManager.getInstance().setContents(StringSelection(text))
+            CopyPasteManager.getInstance().setContents(StringSelection(format.text))
             val project = e.getData(PlatformDataKeys.PROJECT)
             NotificationGroupManager.getInstance()
                 .getNotificationGroup("TC DataSources")
-                .createNotification("Copied: $label", NotificationType.INFORMATION)
+                .createNotification("Copied: ${format.label}", NotificationType.INFORMATION)
                 .notify(project)
+        }
+    }
+
+    companion object {
+        private fun iconFor(kind: FormatKind) = when (kind) {
+            FormatKind.CLI -> com.intellij.icons.AllIcons.Nodes.Console
+            else -> com.intellij.icons.AllIcons.Nodes.DataTables
         }
     }
 }

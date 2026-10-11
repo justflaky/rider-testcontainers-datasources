@@ -12,7 +12,9 @@ data class ConnData(
     val jdbcUrl: String,
 )
 
-data class CopyFormat(val label: String, val text: String)
+enum class FormatKind { URI, DOTNET, CLI }
+
+data class CopyFormat(val label: String, val text: String, val kind: FormatKind)
 
 /**
  * Renders connection strings in the formats people actually paste:
@@ -21,15 +23,20 @@ data class CopyFormat(val label: String, val text: String)
  */
 fun connectionFormats(d: ConnData): List<CopyFormat> {
     val out = mutableListOf<CopyFormat>()
-    out += CopyFormat("JDBC URL", d.jdbcUrl)
+
+    fun uri(text: String) {
+        out += CopyFormat("JDBC URL", text, FormatKind.URI)
+    }
 
     fun dotnet(body: String, provider: String) {
-        out += CopyFormat("ADO.NET / EF Core ($provider)", body)
+        out += CopyFormat(".NET ($provider)", body, FormatKind.DOTNET)
     }
 
     fun cli(label: String, text: String) {
-        out += CopyFormat(label, text)
+        out += CopyFormat(label, text, FormatKind.CLI)
     }
+
+    uri(d.jdbcUrl)
 
     when (d.dbms) {
         TcDbms.POSTGRES -> {
@@ -48,9 +55,9 @@ fun connectionFormats(d: ConnData): List<CopyFormat> {
                 if (d.user.isNotEmpty()) append(" user=${d.user}")
                 if (d.password.isNotEmpty()) append(" password=${d.password}")
             }
-            cli("psql (conninfo string)", """psql "$connInfo"""")
+            cli("psql — conninfo", """psql "$connInfo"""")
             cli(
-                "psql (command line)",
+                "psql — CLI",
                 buildString {
                     if (d.password.isNotEmpty()) append("PGPASSWORD='${d.password}' ")
                     append("psql -h ${d.host} -p ${d.port}")
@@ -68,10 +75,10 @@ fun connectionFormats(d: ConnData): List<CopyFormat> {
                     if (d.user.isNotEmpty()) append(";User ID=${d.user}")
                     if (d.password.isNotEmpty()) append(";Password=${d.password}")
                 },
-                "MySqlConnector / Pomelo",
+                "MySqlConnector",
             )
             cli(
-                "mysql client",
+                "mysql — CLI",
                 buildString {
                     append("mysql -h ${d.host} -P ${d.port}")
                     if (d.user.isNotEmpty()) append(" -u ${d.user}")
@@ -90,7 +97,7 @@ fun connectionFormats(d: ConnData): List<CopyFormat> {
                     if (d.password.isNotEmpty()) append(";Password=${d.password}")
                     append(";Encrypt=False;TrustServerCertificate=True")
                 },
-                "Microsoft.Data.SqlClient",
+                "SqlClient",
             )
             cli(
                 "sqlcmd",
@@ -117,7 +124,7 @@ fun connectionFormats(d: ConnData): List<CopyFormat> {
         }
 
         TcDbms.MONGO -> {
-            cli("mongosh (URI)", """mongosh "${d.jdbcUrl}"""")
+            cli("mongosh", """mongosh "${d.jdbcUrl}"""")
             cli("pymongo", """MongoClient("${d.jdbcUrl}")""")
         }
     }

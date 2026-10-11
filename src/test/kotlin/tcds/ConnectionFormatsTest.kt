@@ -26,7 +26,7 @@ class ConnectionFormatsTest {
     fun `postgres npgsql`() {
         assertEquals(
             "Host=localhost;Port=55001;Database=orders;Username=app;Password=s3cret",
-            text(pg, "ADO.NET / EF Core (Npgsql)"),
+            text(pg, ".NET (Npgsql)"),
         )
     }
 
@@ -34,11 +34,11 @@ class ConnectionFormatsTest {
     fun `postgres psql conninfo and cli`() {
         assertEquals(
             """psql "host=localhost port=55001 dbname=orders user=app password=s3cret"""",
-            text(pg, "psql (conninfo string)"),
+            text(pg, "psql — conninfo"),
         )
         assertEquals(
             "PGPASSWORD='s3cret' psql -h localhost -p 55001 -U app -d orders",
-            text(pg, "psql (command line)"),
+            text(pg, "psql — CLI"),
         )
     }
 
@@ -50,11 +50,11 @@ class ConnectionFormatsTest {
         )
         assertEquals(
             "Server=localhost;Port=33060;Database=shopdb;User ID=shop;Password=shop123",
-            text(my, "ADO.NET / EF Core (MySqlConnector / Pomelo)"),
+            text(my, ".NET (MySqlConnector)"),
         )
         assertEquals(
             "mysql -h localhost -P 33060 -u shop -p'shop123' shopdb",
-            text(my, "mysql client"),
+            text(my, "mysql — CLI"),
         )
     }
 
@@ -66,7 +66,7 @@ class ConnectionFormatsTest {
         )
         assertEquals(
             "Server=localhost,14330;Database=master;User Id=sa;Password=S3cret;Encrypt=False;TrustServerCertificate=True",
-            text(ms, "ADO.NET / EF Core (Microsoft.Data.SqlClient)"),
+            text(ms, ".NET (SqlClient)"),
         )
         assertEquals(
             "sqlcmd -S localhost,14330 -U sa -P 'S3cret' -d master",
@@ -91,14 +91,14 @@ class ConnectionFormatsTest {
             TcDbms.MONGO, "localhost", 56001, null, "root", "mongopw",
             "mongodb://root:mongopw@localhost:56001/?authSource=admin",
         )
-        assertEquals("""mongosh "mongodb://root:mongopw@localhost:56001/?authSource=admin"""", text(mo, "mongosh (URI)"))
+        assertEquals("""mongosh "mongodb://root:mongopw@localhost:56001/?authSource=admin"""", text(mo, "mongosh"))
         assertEquals("""MongoClient("mongodb://root:mongopw@localhost:56001/?authSource=admin")""", text(mo, "pymongo"))
     }
 
     @Test
     fun `mysql without database omits database parts`() {
         val my = ConnData(TcDbms.MYSQL, "localhost", 33061, null, "root", "rootpw", "jdbc:mysql://localhost:33061/?user=root")
-        assertEquals("Server=localhost;Port=33061;User ID=root;Password=rootpw", text(my, "ADO.NET / EF Core (MySqlConnector / Pomelo)"))
-        assertEquals("mysql -h localhost -P 33061 -u root -p'rootpw'", text(my, "mysql client"))
+        assertEquals("Server=localhost;Port=33061;User ID=root;Password=rootpw", text(my, ".NET (MySqlConnector)"))
+        assertEquals("mysql -h localhost -P 33061 -u root -p'rootpw'", text(my, "mysql — CLI"))
     }
 }
