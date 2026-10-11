@@ -1,10 +1,10 @@
 <plugins>
   <plugin id="Testcontainers.DataSources"
-          url="https://github.com/justflaky/rider-testcontainers-datasources/releases/download/v0.3.0/rider-testcontainers-datasources-0.3.0.zip"
-          version="0.3.0">
+          url="https://github.com/justflaky/rider-testcontainers-datasources/releases/download/v0.4.0/rider-testcontainers-datasources-0.4.0.zip"
+          version="0.4.0">
     <idea-version since-build="262"/>
     <name>Testcontainers Data Sources</name>
     <description>Automatically creates Database tool window data sources for containers started by Testcontainers (PostgreSQL, MySQL, MariaDB, SQL Server, Redis, MongoDB) and removes them when the container dies. Requires docker CLI in PATH.</description>
-    <change-notes>Releases are now built and published by CI from tags; watcher fully coroutine-based (cleaner lifecycle, blocking docker calls on IO); non-blocking CI check against the latest Rider line; README troubleshooting; English plugin description with vendor URL.</change-notes>
+    <change-notes>New "Copy Connection As..." submenu on plugin data sources in the Database view: copy the connection as JDBC URL, ADO.NET / EF Core provider string (Npgsql, MySqlConnector/Pomelo, Microsoft.Data.SqlClient), or a ready CLI command (psql, mysql, sqlcmd, redis-cli, mongosh, pymongo); StackExchange.Redis config string.</change-notes>
   </plugin>
 </plugins>
