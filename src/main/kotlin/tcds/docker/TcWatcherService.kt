@@ -8,7 +8,11 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tcds.TC_SETTINGS_TOPIC
@@ -16,22 +20,25 @@ import tcds.TcNotifications
 import tcds.TcSettings
 import tcds.TcSettingsChangedListener
 import tcds.ds.DataSourceRegistrar
-import java.util.concurrent.TimeUnit
 
 /**
  * Watches Docker for Testcontainers containers: keeps a `docker events` stream open,
  * falls back to periodic daemon checks + `docker ps` snapshots when the stream dies.
- * All blocking docker CLI calls run on [Dispatchers.IO]; the loop lives in the project
- * service coroutine scope and dies with it.
+ * All blocking docker CLI calls run on [Dispatchers.IO].
+ *
+ * Everything runs in a service-owned [ownScope] that is cancelled in [dispose] - NOT in the
+ * constructor-injected project scope, which stays alive across dynamic plugin unload/update
+ * (open project) and left the loop holding plugin classes, hanging "Unloading plugin".
  */
 @Service(Service.Level.PROJECT)
 class TcWatcherService(
     private val project: Project,
-    private val cs: CoroutineScope,
+    cs: CoroutineScope,
 ) : Disposable {
 
+    private val ownScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val cli = DockerCli()
-    private val registrar = DataSourceRegistrar(project, cs)
+    private val registrar = DataSourceRegistrar(project, ownScope)
 
     @Volatile private var eventsProcess: Process? = null
     @Volatile private var stopped = false
@@ -56,7 +63,7 @@ class TcWatcherService(
         if (started) return
         started = true
         LOG.info("tcds: watcher start requested (project=${project.name})")
-        cs.launch { watchLoop() }
+        ownScope.launch { watchLoop() }
     }
 
     /** Live disable from the settings page: kills the stream; re-enable reopens it via start(). */
@@ -122,10 +129,13 @@ class TcWatcherService(
             withContext(Dispatchers.IO) {
                 val reader = process.inputStream.bufferedReader()
                 while (true) {
+                    currentCoroutineContext().ensureActive() // exit promptly on dispose-cancel
                     val line = reader.readLine() ?: break
                     handleEventLine(line)
                 }
             }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
             LOG.warn("tcds: events stream reader failed: ${e.message}")
         } finally {
@@ -151,7 +161,8 @@ class TcWatcherService(
 
     override fun dispose() {
         stopped = true
-        eventsProcess?.destroyForcibly()
+        eventsProcess?.destroyForcibly() // EOFs the blocked reader -> loop exits
+        ownScope.cancel() // cooperative stop for delay()/ensureActive() suspension points
     }
 
     companion object {
