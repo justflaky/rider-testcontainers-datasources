@@ -48,7 +48,7 @@ class DataSourceRegistrar(
                         existing!!.url = decision.url
                         existing.username = decision.user
                         manager.saveDataSource(existing)
-                        LOG.info("tcds: updated data source '${existing.name}' url='${existing.url}'")
+                        LOG.info("tcds: updated data source '${existing.name}' url='${redactUrl(existing.url.orEmpty())}'")
                         scheduleSync(existing)
                     }
                 }
@@ -88,7 +88,7 @@ class DataSourceRegistrar(
         ds.setAdditionalProperty(DsOwnership.MARKER_KEY, info.id)
         ds.setAutoSynchronize(true)
         manager.addDataSource(ds)
-        LOG.info("tcds: registered data source name='${ds.name}' url='${ds.url}' user='${ds.username}' container=${info.id}")
+        LOG.info("tcds: registered data source name='${ds.name}' url='${redactUrl(ds.url.orEmpty())}' user='${ds.username}' container=${info.id}")
 
         scheduleSync(ds)
         TcNotifications.dataSourceAdded(project, name, target)

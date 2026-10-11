@@ -1,5 +1,6 @@
 package tcds
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.options.Configurable
 import java.awt.FlowLayout
 import javax.swing.JCheckBox
@@ -14,7 +15,7 @@ class TcSettingsConfigurable : Configurable {
     private val prefixField = JTextField(10)
     private val panel = JPanel(FlowLayout(FlowLayout.LEFT, 4, 4)).apply {
         add(enabledBox)
-        add(JLabel("Data source name prefix:"))
+        add(JLabel("Data source name prefix (applies to new data sources):"))
         add(prefixField)
     }
 
@@ -37,5 +38,8 @@ class TcSettingsConfigurable : Configurable {
         val s = TcSettings.getInstance()
         s.enabled = enabledBox.isSelected
         s.namePrefix = prefixField.text.trim().ifEmpty { "TC" }
+        // live reaction: watcher stops/starts without a project reopen
+        ApplicationManager.getApplication().messageBus
+            .syncPublisher(TC_SETTINGS_TOPIC).settingsChanged(s.enabled)
     }
 }

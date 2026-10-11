@@ -13,8 +13,6 @@ class DockerCli(
 
     data class ExecResult(val exitCode: Int, val output: String)
 
-    val isAvailable: Boolean get() = daemonVersion() != null
-
     fun daemonVersion(): String? {
         val r = exec(listOf("version", "--format", "{{.Server.Version}}"))
         return if (r.exitCode == 0) r.output.trim().ifEmpty { null } else null

@@ -1,13 +1,16 @@
 package tcds.docker
 
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import kotlinx.coroutines.CoroutineScope
+import tcds.TC_SETTINGS_TOPIC
 import tcds.TcNotifications
 import tcds.TcSettings
+import tcds.TcSettingsChangedListener
 import tcds.ds.DataSourceRegistrar
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -34,6 +37,14 @@ class TcWatcherService(
     @Volatile private var streamAlive = false
     @Volatile private var dockerWarned = false
 
+    init {
+        ApplicationManager.getApplication().messageBus.connect(this)
+            .subscribe(TC_SETTINGS_TOPIC, TcSettingsChangedListener { enabled ->
+                LOG.info("tcds: settings changed (enabled=$enabled)")
+                if (enabled) start() else stopWatching()
+            })
+    }
+
     fun start() {
         val settings = TcSettings.getInstance()
         LOG.info("tcds: watcher start requested (enabled=${settings.enabled}, project=${project.name})")
@@ -41,8 +52,21 @@ class TcWatcherService(
         scheduler.execute(::ensureWatching)
     }
 
+    /** Live disable from the settings page: kills the stream; re-enable reopens it via start(). */
+    fun stopWatching() {
+        streamAlive = false
+        eventsProcess?.destroyForcibly()
+        eventsProcess = null
+        LOG.info("tcds: watching stopped (disabled in settings)")
+    }
+
     private fun ensureWatching() {
         if (stopped || project.isDisposed) return
+        if (!TcSettings.getInstance().enabled) { // safety net when no topic fired
+            if (streamAlive) stopWatching()
+            schedule(::ensureWatching, DAEMON_RETRY_SECONDS)
+            return
+        }
         val version = cli.daemonVersion()
         if (version == null) {
             LOG.info("tcds: docker daemon not reachable, retrying in ${DAEMON_RETRY_SECONDS}s")
