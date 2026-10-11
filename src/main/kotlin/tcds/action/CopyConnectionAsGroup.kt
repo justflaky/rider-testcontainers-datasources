@@ -2,6 +2,7 @@ package tcds.action
 
 import com.intellij.database.dataSource.LocalDataSource
 import com.intellij.database.dataSource.LocalDataSourceManager
+import com.intellij.database.view.DatabaseView
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.ActionUpdateThread
@@ -21,33 +22,42 @@ import java.awt.datatransfer.StringSelection
 
 /**
  * "Copy Connection As..." submenu in the Database view context menu.
- * Lists plugin-owned data sources, grouped with named separators when several are live;
- * entries carry type icons (JDBC/.NET vs CLI) for faster scanning.
+ * Shown only where a plugin-owned data source is actually related to the clicked node
+ * (the data source itself or anything inside its subtree) - not for root folders,
+ * foreign data sources, or unrelated nodes.
  */
 class CopyConnectionAsGroup : DefaultActionGroup() {
 
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
     override fun update(e: AnActionEvent) {
-        e.presentation.isVisible = ownedDataSources(e).isNotEmpty()
+        e.presentation.isVisible = relatedOwnedDataSources(e).isNotEmpty()
     }
 
     override fun getChildren(e: AnActionEvent?): Array<AnAction> {
-        val owned = e?.let(::ownedDataSources) ?: return emptyArray()
+        val related = e?.let(::relatedOwnedDataSources) ?: return emptyArray()
         val children = mutableListOf<AnAction>()
-        for (ds in owned) {
+        for (ds in related) {
             val data = connData(ds) ?: continue
-            if (owned.size > 1) children += Separator.create(ds.name)
+            if (related.size > 1) children += Separator.create(ds.name)
             children += connectionFormats(data).map { CopyTextAction(it) }
         }
         return children.toTypedArray()
     }
 
-    private fun ownedDataSources(e: AnActionEvent): List<LocalDataSource> {
+    /**
+     * Plugin-owned data sources related to the clicked tree node, matched by name against
+     * the manager (names are unique per project). Empty when the popup is on a root
+     * folder or inside a non-plugin data source.
+     */
+    private fun relatedOwnedDataSources(e: AnActionEvent): List<LocalDataSource> {
         val project = e.project ?: return emptyList()
-        return LocalDataSourceManager.getInstance(project).dataSources
+        val nodes = e.getData(DatabaseView.DATABASE_RELATED_DATA_SOURCES) ?: return emptyList()
+        val ownedByName = LocalDataSourceManager.getInstance(project).dataSources
             .filterIsInstance<LocalDataSource>()
             .filter { it.getAdditionalProperty(DsOwnership.MARKER_KEY) != null }
+            .associateBy { it.name }
+        return nodes.mapNotNull { ownedByName[it.name] }.distinct()
     }
 
     private fun connData(ds: LocalDataSource): ConnData? {
