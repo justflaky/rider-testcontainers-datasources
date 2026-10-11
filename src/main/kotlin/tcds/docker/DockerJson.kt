@@ -88,6 +88,4 @@ object DockerJson {
 
     private fun JsonObject.primitive(name: String): String? =
         get(name)?.takeIf { it.isJsonPrimitive }?.asString
-
-    private fun JsonElement?.asSafeObject(): JsonObject? = this as? JsonObject
 }

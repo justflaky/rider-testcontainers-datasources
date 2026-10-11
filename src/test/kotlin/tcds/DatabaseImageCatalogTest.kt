@@ -180,6 +180,24 @@ class DatabaseImageCatalogTest {
     }
 
     @Test
+    fun `mongo with root credentials`() {
+        val t = DatabaseImageCatalog.resolve(
+            container("mongo:7", mapOf(27017 to 56001), env = mapOf("MONGO_INITDB_ROOT_USERNAME" to "root", "MONGO_INITDB_ROOT_PASSWORD" to "mongopw")),
+        )!!
+        assertEquals(TcDbms.MONGO, t.dbms)
+        assertEquals("mongodb://root:mongopw@localhost:56001/?authSource=admin", t.url)
+        assertEquals("root", t.user)
+        assertEquals("mongopw", t.password)
+    }
+
+    @Test
+    fun `mongo without auth`() {
+        val t = DatabaseImageCatalog.resolve(container("mongo:7", mapOf(27017 to 56002)))!!
+        assertEquals("mongodb://localhost:56002/", t.url)
+        assertEquals("", t.user)
+    }
+
+    @Test
     fun `database image without published port returns null`() {
         assertNull(DatabaseImageCatalog.resolve(container("postgres:16", mapOf(5432 to 0))))
         assertNull(DatabaseImageCatalog.resolve(container("postgres:16", emptyMap())))

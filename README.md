@@ -39,6 +39,16 @@ Wymaga publicznego repo (raw GitHub nie serwuje anonimowo z prywatnych). Wersje 
 tak: nowy zip jako asset release'a `vX.Y.Z` + aktualizacja `version`/`url` w
 `repository/updatePlugins.xml`.
 
+## Konfiguracja
+
+`Settings → Tools → Testcontainers Data Sources`:
+
+- **Watch for Testcontainers containers** — globalne włączenie/wyłączenie watchera,
+- **Data source name prefix** — prefiks nazw data source'ów (domyślnie `TC`).
+
+Zmienne środowiskowe (w procesie IDE): `TCDS_DOCKER_BINARY` — pełna ścieżka do binarki dockera,
+gdy nie jest na PATH. Ustawienia trwałe trzymają się w `tcds.xml` (`enabled`, `namePrefix`).
+
 ## Budowanie ze źródeł
 
 ```bash

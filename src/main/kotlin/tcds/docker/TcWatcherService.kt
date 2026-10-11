@@ -5,6 +5,8 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import kotlinx.coroutines.CoroutineScope
+import tcds.TcNotifications
 import tcds.TcSettings
 import tcds.ds.DataSourceRegistrar
 import java.util.concurrent.Executors
@@ -16,10 +18,13 @@ import java.util.concurrent.TimeUnit
  * falls back to periodic daemon checks + `docker ps` snapshots when the stream dies.
  */
 @Service(Service.Level.PROJECT)
-class TcWatcherService(private val project: Project) : Disposable {
+class TcWatcherService(
+    private val project: Project,
+    private val cs: CoroutineScope,
+) : Disposable {
 
     private val cli = DockerCli()
-    private val registrar = DataSourceRegistrar(project)
+    private val registrar = DataSourceRegistrar(project, cs)
     private val scheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor { r ->
         Thread(r, "tcds-scheduler").apply { isDaemon = true }
     }
@@ -27,6 +32,7 @@ class TcWatcherService(private val project: Project) : Disposable {
     @Volatile private var eventsProcess: Process? = null
     @Volatile private var stopped = false
     @Volatile private var streamAlive = false
+    @Volatile private var dockerWarned = false
 
     fun start() {
         val settings = TcSettings.getInstance()
@@ -40,9 +46,14 @@ class TcWatcherService(private val project: Project) : Disposable {
         val version = cli.daemonVersion()
         if (version == null) {
             LOG.info("tcds: docker daemon not reachable, retrying in ${DAEMON_RETRY_SECONDS}s")
+            if (!dockerWarned) {
+                dockerWarned = true
+                TcNotifications.dockerUnavailable(project)
+            }
             schedule(::ensureWatching, DAEMON_RETRY_SECONDS)
             return
         }
+        dockerWarned = false
         LOG.info("tcds: docker daemon up (server=$version)")
         reconcileSnapshot()
         if (!streamAlive) startEventsStream()

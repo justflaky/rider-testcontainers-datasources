@@ -16,6 +16,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="tcds.TcSettings"/>
+        <applicationConfigurable parentId="tools" instance="tcds.TcSettingsConfigurable"/>
         <postStartupActivity implementation="tcds.TcStartupActivity"/>
         <notificationGroup id="TC DataSources" displayType="BALLOON"/>
     </extensions>

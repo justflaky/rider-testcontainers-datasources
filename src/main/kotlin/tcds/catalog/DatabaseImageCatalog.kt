@@ -3,7 +3,7 @@ package tcds.catalog
 import tcds.model.ContainerInfo
 import java.net.URLEncoder
 
-enum class TcDbms { POSTGRES, MYSQL, MARIA, MSSQL, REDIS }
+enum class TcDbms { POSTGRES, MYSQL, MARIA, MSSQL, REDIS, MONGO }
 
 data class JdbcTarget(
     val dbms: TcDbms,
@@ -33,6 +33,9 @@ object DatabaseImageCatalog {
         val hostPort = c.hostPorts[spec.containerPort]?.takeIf { it > 0 } ?: return null
         return spec.build(c, hostPort)
     }
+
+    /** Image tokens that may appear in plugin-owned data source names (ownership fallback). */
+    val knownImageBases: Set<String> get() = specs.flatMapTo(mutableSetOf()) { it.baseNames }
 
     private fun enc(v: String): String = URLEncoder.encode(v, Charsets.UTF_8)
 
@@ -111,6 +114,20 @@ object DatabaseImageCatalog {
                 url,
                 "", password, null,
             )
+        },
+        Spec(
+            baseNames = setOf("mongo"),
+            containerPort = 27017,
+        ) { c, host ->
+            val user = c.env["MONGO_INITDB_ROOT_USERNAME"]
+            val password = c.env["MONGO_INITDB_ROOT_PASSWORD"] ?: ""
+            val url = if (!user.isNullOrEmpty()) {
+                // root users are created in the admin database
+                "mongodb://${enc(user)}:${enc(password)}@localhost:$host/?authSource=admin"
+            } else {
+                "mongodb://localhost:$host/"
+            }
+            JdbcTarget(TcDbms.MONGO, url, user ?: "", password, null)
         },
     )
 
