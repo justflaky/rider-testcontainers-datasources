@@ -1,9 +1,9 @@
 <plugins>
   <plugin id="Testcontainers.DataSources"
-          url="https://github.com/justflaky/rider-testcontainers-datasources/releases/download/v0.4.3/rider-testcontainers-datasources-0.4.3.zip"
-          version="0.4.3">
+          url="https://github.com/justflaky/rider-testcontainers-datasources/releases/download/v0.4.4/rider-testcontainers-datasources-0.4.4.zip"
+          version="0.4.4">
     <idea-version since-build="262"/>
     <name>Testcontainers Data Sources</name>
     <description>Automatically creates Database tool window data sources for containers started by Testcontainers (PostgreSQL, MySQL, MariaDB, SQL Server, Redis, MongoDB) and removes them when the container dies. Requires docker CLI in PATH.</description>
-    <change-notes>Fix: the "Copy Connection As..." submenu never appeared (wrong registration tag); it now shows in the Database view context menu.</change-notes></plugin>
+    <change-notes>Copy Connection As submenu now appears only on the plugin data source and its subtree in the Database view - no longer on unrelated folders.</change-notes>/plugin>
 </plugins>
