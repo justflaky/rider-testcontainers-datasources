@@ -1,14 +1,15 @@
 <idea-plugin>
     <id>Testcontainers.DataSources</id>
     <name>Testcontainers Data Sources</name>
-    <vendor>justflaky</vendor>
+    <vendor url="https://github.com/justflaky/rider-testcontainers-datasources">justflaky</vendor>
     <description><![CDATA[
     Automatically registers Database tool window data sources for databases started by Testcontainers.
     <p>
-    When a Testcontainers-managed container (PostgreSQL, MySQL, MariaDB, SQL Server) starts,
+    When a Testcontainers-managed container (PostgreSQL, MySQL, MariaDB, SQL Server, Redis, MongoDB) starts,
     the plugin reads its published port and credentials from Docker and creates a ready-to-use
     data source. When the container is removed (Ryuk cleanup), the data source is removed too.
     </p>
+    <p>Requires docker CLI in PATH. Settings: Settings | Tools | Testcontainers Data Sources.</p>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>

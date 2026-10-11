@@ -33,19 +33,22 @@ make: the version number and the change notes.
    `git log <prev-tag>..HEAD --oneline`). Polish or English, matching the existing style.
 3. **Run the script** from the repo root (or anywhere — it cds itself):
    ```bash
-   bash .agents/skills/tcds-plugin-release/scripts/release.sh <VERSION> "<release body>"
+   bash .agents/skills/tcds-plugin-release/scripts/release.sh <VERSION> "<notes>"
    ```
-   It bumps both files, runs `./gradlew test buildPlugin`, commits **only those two
-   files** (never `git add -A` — user files like `*.DotSettings.user` must not leak in),
-   pushes, creates release `v<VERSION>` with the zip as an asset, and verifies URLs.
-4. **Check the script's summary.** Green build + `state: uploaded` + HTTP 200 on both
-   URLs = done. Interpret failures:
+   It bumps both files, runs a local sanity build (`test buildPlugin`), commits **only those
+   two files** (never `git add -A` — user files like `*.DotSettings.user` must not leak in),
+   pushes, and pushes tag `v<VERSION>`. The **Release workflow on CI** then builds, verifies
+   and creates the GitHub release with the zip asset. Offline fallback (no CI):
+   `scripts/release-local.sh <VERSION> "<body>"` does everything locally via the REST API.
+4. **Verify the release exists** once the workflow is green (check
+   `actions/workflows/release.yml`): asset URL
+   `https://github.com/<slug>/releases/download/v<VERSION>/rider-testcontainers-datasources-<VERSION>.zip`
+   must return HTTP 200. Failures:
    - gradle "user-mapped section open" on gson jar → a sandbox IDE still runs;
      `powershell -File scripts/kill-ide.ps1` and rerun.
-   - release API error "already_exists" → tag v<VERSION> exists; pick another version
-     or delete the draft release first.
-   - verification 404 while everything else succeeded → repo is private; remind the
-     user the custom plugin repository only works once the repo is public.
+   - tag already exists → pick another version or delete the tag/release first.
+   - workflow red on verifyPlugin after an IDE/Rider line bump → check the verifier report
+     before retrying; the semi-internal Database API is the usual suspect.
 5. **Report** to the user: version, commit, release URL, asset URL, and the
    updatePlugins.xml state (users with the custom repo configured get an auto-update).
 

@@ -1,3 +1,4 @@
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -43,6 +44,16 @@ intellijPlatform {
             sinceBuild = provider { "262" }
             // semi-internal com.intellij.database API: opt out of future lines until verified
             untilBuild = provider { "262.*" }
+        }
+    }
+    pluginVerification {
+        ides {
+            // CI exposes -PtcdsLatestIde=<version> to check the next Rider line (non-blocking step)
+            if (project.hasProperty("tcdsLatestIde")) {
+                create(IntelliJPlatformType.Rider, project.property("tcdsLatestIde") as String)
+            } else {
+                recommended()
+            }
         }
     }
     instrumentCode = false

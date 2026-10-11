@@ -49,6 +49,21 @@ tak: nowy zip jako asset release'a `vX.Y.Z` + aktualizacja `version`/`url` w
 Zmienne środowiskowe (w procesie IDE): `TCDS_DOCKER_BINARY` — pełna ścieżka do binarki dockera,
 gdy nie jest na PATH. Ustawienia trwałe trzymają się w `tcds.xml` (`enabled`, `namePrefix`).
 
+## Rozwiązywanie problemów
+
+- **Balon „Docker is not available" / nic się nie dzieje** — demon Dockera leży albo
+  `docker` CLI nie jest w PATH procesu Ridera. Plugin ponawia próbę co 30 s; binarkę można
+  wskazać zmienną `TCDS_DOCKER_BINARY` (wymaga restartu IDE po zmianie enva).
+- **Data source nie powstaje** — kontener musi publikować port na hoście (`-p`/testcontainers
+  robi to domyślnie) i nosić labelkę `org.testcontainers=true` (stawiają ją biblioteki
+  Testcontainers; surowy `docker run` bez labelki jest ignorowany).
+- **Zmiana prefiksu w ustawieniach** — działa tylko dla nowo tworzonych data source'ów.
+- **Plugin nie instaluje się** — Rider 2026.2+ wymagany (`since-build=262`, `until-build=262.*`).
+- **Hasła w `idea.log`** — plugin redaguje własne wpisy (`password=***`), ale natywne logi
+  modułu Database (`DatabaseConnectionEstablisher`, historia DS) wypisują pełny URL połączenia
+  — dotyczy to każdego data source'a z credentialami w URL (także ręcznych). Nie udostępniaj
+  logów z sesji z wrażliwymi testowymi hasłami.
+
 ## Budowanie ze źródeł
 
 ```bash

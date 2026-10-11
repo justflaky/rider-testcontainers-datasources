@@ -21,6 +21,14 @@ jobs:
       - name: Test, build and verify plugin
         run: ./gradlew test buildPlugin verifyPlugin --console=plain
 
+      # Early warning against the next Rider line; informational only (until-build pins installs to 262.*)
+      - name: Verify against latest Rider line (non-blocking)
+        if: ${{ env.TCDS_LATEST_IDE != '' }}
+        continue-on-error: true
+        run: ./gradlew verifyPlugin -PtcdsLatestIde=${{ env.TCDS_LATEST_IDE }} --console=plain
+        env:
+          TCDS_LATEST_IDE: ${{ vars.TCDS_LATEST_IDE }}
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
