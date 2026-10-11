@@ -28,6 +28,17 @@ zostanie pobrany automatycznie przy pierwszej synchronizacji).
 Z gotowego zipa: `Settings → Plugins → ⚙ → Install Plugin from Disk…` →
 `build/distributions/rider-testcontainers-datasources-0.1.0.zip`.
 
+Albo przez **własne repozytorium pluginów** (plugin pojawia się w wyszukiwarce IDE i dostaje
+automatyczne aktualizacje): `Settings → Plugins → ⚙ → Manage Plugin Repositories → [+]` i dodaj:
+
+```
+https://raw.githubusercontent.com/justflaky/rider-testcontainers-datasources/master/repository/updatePlugins.xml
+```
+
+Wymaga publicznego repo (raw GitHub nie serwuje anonimowo z prywatnych). Wersje dystrybuje się
+tak: nowy zip jako asset release'a `vX.Y.Z` + aktualizacja `version`/`url` w
+`repository/updatePlugins.xml`.
+
 ## Budowanie ze źródeł
 
 ```bash
