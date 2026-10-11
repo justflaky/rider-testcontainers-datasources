@@ -16,3 +16,6 @@ tc-demo/obj/
 # misc
 *.log
 run/
+
+# Rider per-user solution settings (created when the IDE opens tc-demo)
+*.DotSettings.user
