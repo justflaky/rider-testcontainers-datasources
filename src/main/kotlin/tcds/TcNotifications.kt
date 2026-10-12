@@ -12,6 +12,7 @@ object TcNotifications {
     private const val GROUP_ID = "TC DataSources"
 
     fun dataSourceAdded(project: Project, name: String, target: JdbcTarget) {
+        if (!TcSettings.getInstance().notifyOnAdded) return
         NotificationGroupManager.getInstance()
             .getNotificationGroup(GROUP_ID)
             .createNotification("Data source created: $name", target.url, NotificationType.INFORMATION)
@@ -20,6 +21,7 @@ object TcNotifications {
     }
 
     fun dataSourceRemoved(project: Project, name: String) {
+        if (!TcSettings.getInstance().notifyOnRemoved) return
         NotificationGroupManager.getInstance()
             .getNotificationGroup(GROUP_ID)
             .createNotification("Data source removed: $name", "The container is no longer running.", NotificationType.INFORMATION)
@@ -27,6 +29,7 @@ object TcNotifications {
     }
 
     fun dockerUnavailable(project: Project) {
+        if (!TcSettings.getInstance().notifyDockerUnavailable) return
         NotificationGroupManager.getInstance()
             .getNotificationGroup(GROUP_ID)
             .createNotification(

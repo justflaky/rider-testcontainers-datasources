@@ -15,6 +15,11 @@ class TcSettings : PersistentStateComponent<TcSettings> {
     /** Data source name prefix; also used to recognize plugin-owned data sources after a restart. */
     var namePrefix: String = "TC"
 
+    // notification preferences
+    var notifyOnAdded: Boolean = true
+    var notifyOnRemoved: Boolean = true
+    var notifyDockerUnavailable: Boolean = true
+
     override fun getState(): TcSettings = this
 
     override fun loadState(state: TcSettings) = XmlSerializerUtil.copyBean(state, this)

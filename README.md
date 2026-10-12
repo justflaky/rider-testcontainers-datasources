@@ -49,7 +49,9 @@ tak: nowy zip jako asset release'a `vX.Y.Z` + aktualizacja `version`/`url` w
 `Settings → Tools → Testcontainers Data Sources`:
 
 - **Watch for Testcontainers containers** — globalne włączenie/wyłączenie watchera,
-- **Data source name prefix** — prefiks nazw data source'ów (domyślnie `TC`).
+- **Data source name prefix** — prefiks nazw data source'ów (domyślnie `TC`),
+- **Notifications** — osobne przełączniki: utworzenie data source'a, usunięcie,
+  „Docker unavailable".
 
 Zmienne środowiskowe (w procesie IDE): `TCDS_DOCKER_BINARY` — pełna ścieżka do binarki dockera,
 gdy nie jest na PATH. Ustawienia trwałe trzymają się w `tcds.xml` (`enabled`, `namePrefix`).
