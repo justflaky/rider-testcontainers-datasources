@@ -25,6 +25,14 @@ sed -i "s/^version = .*/version = \"$VERSION\"/" build.gradle.kts
 sed -i "s/version=\"[0-9][0-9.]*\"/version=\"$VERSION\"/" repository/updatePlugins.xml
 sed -i "s|releases/download/v[0-9.][0-9.]*/rider-testcontainers-datasources-[0-9.][0-9.]*\.zip|releases/download/v$VERSION/rider-testcontainers-datasources-$VERSION.zip|" repository/updatePlugins.xml
 
+# updatePlugins.xml must stay well-formed - a corrupted tag broke the custom
+# plugin repository once ("Connection failed" in the IDE's repository dialog)
+python - <<'PYEOF' || { echo "ERROR: repository/updatePlugins.xml is not well-formed XML"; exit 1; }
+import xml.etree.ElementTree as ET
+ET.parse('repository/updatePlugins.xml')
+print('updatePlugins.xml well-formed: OK')
+PYEOF
+
 echo "== 2/5 local sanity build (test + buildPlugin; CI runs the full verification)"
 ./gradlew test buildPlugin --console=plain -q
 [ -f "$ZIP" ] || { echo "ERROR: zip not found: $ZIP"; exit 1; }
