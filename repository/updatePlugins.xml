@@ -1,10 +1,10 @@
 <plugins>
   <plugin id="Testcontainers.DataSources"
-          url="https://github.com/justflaky/rider-testcontainers-datasources/releases/download/v0.4.4/rider-testcontainers-datasources-0.4.4.zip"
-          version="0.4.4">
+          url="https://github.com/justflaky/rider-testcontainers-datasources/releases/download/v0.4.5/rider-testcontainers-datasources-0.4.5.zip"
+          version="0.4.5">
     <idea-version since-build="262"/>
     <name>Testcontainers Data Sources</name>
     <description>Automatically creates Database tool window data sources for containers started by Testcontainers (PostgreSQL, MySQL, MariaDB, SQL Server, Redis, MongoDB) and removes them when the container dies. Requires docker CLI in PATH.</description>
-    <change-notes>Copy Connection As submenu now appears only on the plugin data source and its subtree in the Database view - no longer on unrelated folders.</change-notes>
+    <change-notes>Notification preferences: separate toggles for created/removed/Docker-unavailable balloons (Settings | Tools | Testcontainers Data Sources). Copy Connection As now also works on user-created data sources of supported engines.</change-notes>
   </plugin>
 </plugins>
