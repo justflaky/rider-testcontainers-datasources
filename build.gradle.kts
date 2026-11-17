@@ -22,7 +22,9 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        rider("2026.2.1") {
+        // -PtcdsRider=<version> overrides the target IDE (e.g. 2026.3 for e2e runs);
+        // default stays on the oldest supported line.
+        rider(providers.gradleProperty("tcdsRider").getOrElse("2026.2.1")) {
             useInstaller = false
         }
         bundledPlugin("com.intellij.database")
@@ -43,7 +45,7 @@ intellijPlatform {
         ideaVersion {
             sinceBuild = provider { "262" }
             // semi-internal com.intellij.database API: opt out of future lines until verified
-            untilBuild = provider { "262.*" }
+            untilBuild = provider { "263.*" }
         }
     }
     pluginVerification {

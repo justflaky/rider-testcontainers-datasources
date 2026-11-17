@@ -5,7 +5,7 @@ import com.intellij.database.dataSource.DatabaseDriverManager
 import com.intellij.database.dataSource.LocalDataSource
 import com.intellij.database.dataSource.LocalDataSourceManager
 import com.intellij.database.util.LoaderContext
-import com.intellij.database.util.performAutoSyncTask
+import com.intellij.database.util.performAutoIntrospection
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.diagnostic.Logger
@@ -176,7 +176,10 @@ class DataSourceRegistrar(
                 if (project.isDisposed) return@launch
                 runCatching {
                     val ctx = LoaderContext.selectGeneralTask(project, ds)
-                    performAutoSyncTask(ctx, true)
+                    // suspend fun performAutoIntrospection(LoaderContext, boolean): identical JVM
+                    // signature in Rider 2026.2 and 2026.3; performAutoSyncTask changed its return
+                    // type to void in 2026.3 and would fail to resolve there.
+                    performAutoIntrospection(ctx, true)
                 }
             }
         }
